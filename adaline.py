@@ -40,17 +40,16 @@ class Adaline(object):
         """
         rgen = np.random.RandomState(self.random_state)
         self.w_ = rgen.normal(loc=0.0, scale=0.01, size=1 + X.shape[1])
-        self.errors_ = []
+        self.cost_ = []
 
         for _ in range(self.n_iter):
-            errors = 0
-            for xi, target in zip(X, y):
-                update = self.eta * (target - self.predict(xi))
-                self.w_[1:] += update * xi
-                self.w_[0] += update
-                errors += int(update != 0.0)
-            self.errors_.append(errors)
-
+            net_input = self.net_input(X)
+            output = self.activation(net_input)
+            errors = (y - output)
+            self.w_[1:] += self.eta * X.T.dot(errors)
+            self.w_[0] += self.eta * errors.sum()
+            cost = (errors**2).sum() / 2.0
+            self.cost_.append(cost)
         return self
 
     def net_input(self, X):
